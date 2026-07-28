@@ -2,11 +2,14 @@ import { useEffect, useState } from 'react'
 import type { FolderMetaMap } from '../types'
 import { getPreferences, savePreferences, type Preferences } from '../services/storage'
 
-const palette = ['#8fb5ff', '#b99bea', '#83d2ae', '#ffb28a', '#ef9fbd', '#79c8d8']
+const palette = ['#5b8def', '#9a6dd7', '#3fb986', '#ef8956', '#d96896', '#32a6b8']
+const previousPalette = ['#8fb5ff', '#b99bea', '#83d2ae', '#ffb28a', '#ef9fbd', '#79c8d8']
 const legacyPalette = ['#dce8ff', '#e7e0f7', '#dcefe6', '#f8e3d8', '#f3e0e7', '#e1ebee']
 
 export function folderColor(id: string, saved?: string): string {
   if (saved) {
+    const paletteIndex = previousPalette.indexOf(saved)
+    if (paletteIndex >= 0) return palette[paletteIndex]
     const legacyIndex = legacyPalette.indexOf(saved)
     return legacyIndex >= 0 ? palette[legacyIndex] : saved
   }

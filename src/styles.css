@@ -1,23 +1,30 @@
 :root {
-  color: #1e1e1e;
-  background: #f7f7f7;
+  color: #181a20;
+  background: #f2f4f8;
   font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --ink: #1e1e1e;
-  --muted: #7a7a7a;
-  --line: #e2e2e2;
+  --ink: #181a20;
+  --muted: #687184;
+  --line: #d8dde7;
   --paper: #ffffff;
-  --accent: #0d99ff;
+  --accent: #5b4ff2;
 }
 
 * { box-sizing: border-box; }
 
-html, body, #root { min-height: 100%; margin: 0; }
+html {
+  min-height: 100%;
+  margin: 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
+body, #root { min-height: 100%; margin: 0; }
 
 body {
   min-width: 320px;
-  background: #f7f7f7;
+  background: #f2f4f8;
 }
 
 button, input { font: inherit; }
@@ -27,7 +34,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
 button { color: inherit; }
 
 button:focus-visible, a:focus-visible, input:focus-visible {
-  outline: 2px solid #0d99ff;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
@@ -38,8 +45,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   width: 31px;
   height: 31px;
   place-items: center;
-  border-radius: 9px 9px 9px 2px;
-  background: #273b68;
+  border-radius: 6px 6px 6px 2px;
+  background: #5146d8;
   color: #dce8ff;
   font-family: Georgia, serif;
   font-size: 18px;
@@ -50,7 +57,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   align-items: center;
   gap: 5px;
   margin-bottom: 4px;
-  color: #8490a3;
+  color: #6876a0;
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .12em;
@@ -68,7 +75,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   place-items: center;
   border: 0;
   background: transparent;
-  color: #b5b4ac;
+  color: #8d96a8;
   cursor: grab;
   touch-action: none;
 }
@@ -82,10 +89,10 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   flex: 0 0 23px;
   place-items: center;
   overflow: hidden;
-  border: 1px solid #e1e6ec;
-  border-radius: 6px;
-  background: #f4f6f9;
-  color: #59667a;
+  border: 1px solid #d8deea;
+  border-radius: 4px;
+  background: #eef2f8;
+  color: #4d5d78;
   font-family: Georgia, serif;
   font-size: 12px;
 }
@@ -99,7 +106,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   z-index: 10;
   top: 0;
   padding: 9px 28px;
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: 1px solid #d9deea;
   background: rgba(255, 255, 255, .94);
   backdrop-filter: blur(14px);
 }
@@ -139,9 +146,9 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   justify-content: center;
   margin-left: 2px;
   padding: 0 7px;
-  border-radius: 999px;
-  background: #eeeeee;
-  color: #666;
+  border-radius: 4px;
+  background: #e8e7ff;
+  color: #5146d8;
   font-size: 10px;
   font-weight: 600;
 }
@@ -154,7 +161,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   gap: 7px;
   padding: 0 12px;
   border: 1px solid transparent;
-  border-radius: 6px;
+  border-radius: 4px;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
@@ -163,14 +170,14 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 
 .ui-button:disabled { cursor: wait; opacity: .55; }
 .ui-button.primary {
-  border-color: #5b55e7;
-  background: linear-gradient(135deg, #6c63ff, #4f46e5);
+  border-color: #4f43db;
+  background: linear-gradient(135deg, #6b5df7, #4f43db);
   color: #fff;
   box-shadow: 0 2px 5px rgba(79, 70, 229, .22);
 }
-.ui-button.primary:hover { border-color: #4942d4; background: linear-gradient(135deg, #5f57f3, #4338ca); box-shadow: 0 3px 8px rgba(79, 70, 229, .28); }
-.ui-button.secondary { border-color: #dedede; background: #f5f5f5; color: #333; }
-.ui-button.secondary:hover { background: #eaeaea; }
+.ui-button.primary:hover { border-color: #4337c8; background: linear-gradient(135deg, #5d50e9, #4337c8); box-shadow: 0 3px 8px rgba(79, 70, 229, .32); }
+.ui-button.secondary { border-color: #d3d9e4; background: #f0f2f6; color: #303541; }
+.ui-button.secondary:hover { background: #e5e9f0; }
 .ui-button.danger { border-color: #e03e3e; background: #e03e3e; color: #fff; }
 .ui-button.danger:hover { border-color: #c93232; background: #c93232; }
 
@@ -182,13 +189,13 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   padding: 0;
   place-items: center;
   border: 0;
-  border-radius: 5px;
+  border-radius: 3px;
   background: transparent;
   color: #666;
   cursor: pointer;
 }
 
-.ui-icon-button:hover { background: rgba(0, 0, 0, .06); color: #1e1e1e; }
+.ui-icon-button:hover { background: #e9e8ff; color: #4f43db; }
 
 .root-switcher {
   min-width: 0;
@@ -201,9 +208,9 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   display: flex;
   gap: 2px;
   padding: 3px;
-  border: 1px solid #e4e6eb;
-  border-radius: 9px;
-  background: #f3f4f6;
+  border: 1px solid #d6dce7;
+  border-radius: 6px;
+  background: #e9edf4;
 }
 
 .root-switcher button {
@@ -211,7 +218,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   padding: 0 11px;
   appearance: none;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: #707682;
   font-size: 11px;
@@ -221,8 +228,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   transition: background .14s, color .14s, box-shadow .14s;
 }
 
-.root-switcher button:hover { background: rgba(255, 255, 255, .72); color: #30333a; }
-.root-switcher button[data-state="active"] { background: #fff; color: #4f46e5; box-shadow: 0 1px 3px rgba(25, 31, 45, .14); }
+.root-switcher button:hover { background: rgba(255, 255, 255, .78); color: #30333a; }
+.root-switcher button[data-state="active"] { background: #fff; color: #5146d8; box-shadow: 0 1px 3px rgba(48, 55, 82, .18); }
 
 .bookmark-search {
   display: flex;
@@ -233,20 +240,20 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   gap: 7px;
   margin-left: auto;
   padding: 0 5px 0 10px;
-  border-radius: 8px;
-  background: #f7f8fa;
-  box-shadow: inset 0 0 0 1px #e3e5e9;
+  border-radius: 5px;
+  background: #eef1f6;
+  box-shadow: inset 0 0 0 1px #d8dee8;
   color: #777;
 }
 
-.bookmark-search:focus-within { background: #fff; box-shadow: inset 0 0 0 1px #6c63ff, 0 0 0 3px rgba(108, 99, 255, .1); }
+.bookmark-search:focus-within { background: #fff; box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 3px rgba(91, 79, 242, .12); }
 .bookmark-search input { min-width: 0; height: 100%; flex: 1; border: 0; outline: 0; background: transparent; color: var(--ink); font-size: 11px; }
 .search-actions { display: flex; align-items: center; gap: 2px; }
 
 .bookmark-search kbd {
   padding: 3px 5px;
   border: 1px solid #dfe4eb;
-  border-radius: 5px;
+  border-radius: 3px;
   background: #f4f6f9;
   color: #8792a3;
   font-family: inherit;
@@ -265,7 +272,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   font-size: 11px;
 }
 
-.section-heading > div { display: flex; align-items: center; gap: 7px; color: #4a4a4a; font-weight: 600; }
+.section-heading > div { display: flex; align-items: center; gap: 7px; color: #384057; font-weight: 600; }
 .section-heading p { margin: 0; }
 
 .bookmark-board {
@@ -279,20 +286,20 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 
 .board-drop-surface {
   min-height: calc(100vh - 210px);
-  border-radius: 14px;
+  border-radius: 8px;
   transition: background .15s ease, box-shadow .15s ease;
 }
 
 .board-drop-surface.root-target {
-  background: rgba(220, 232, 255, .34);
-  box-shadow: inset 0 0 0 1px rgba(82, 116, 181, .16);
+  background: rgba(91, 79, 242, .08);
+  box-shadow: inset 0 0 0 1px rgba(91, 79, 242, .24);
 }
 
 .folder-card {
   min-width: 0;
   overflow: visible;
-  border: 1px solid #dedede;
-  border-radius: 9px;
+  border: 0;
+  border-radius: 5px;
   background: var(--paper);
   box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
   transition: box-shadow .18s, border-color .18s, opacity .18s;
@@ -300,19 +307,16 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 }
 
 .folder-card:hover {
-  border-color: #cfcfcf;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, .07);
+  box-shadow: 0 3px 10px rgba(50, 61, 85, .09);
 }
 
 .folder-card.drop-target, .nested-folder.drop-target {
-  border-color: #0d99ff;
-  outline: 2px solid #0d99ff;
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 
 .folder-card.sort-target {
-  border-color: #0d99ff;
-  box-shadow: 0 0 0 2px rgba(13, 153, 255, .18), 0 3px 10px rgba(0, 0, 0, .07);
+  box-shadow: 0 0 0 2px rgba(91, 79, 242, .18), 0 3px 10px rgba(0, 0, 0, .07);
 }
 
 .folder-card.dragging, .nested-folder.dragging, .bookmark-row.dragging { opacity: .28; }
@@ -324,8 +328,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   align-items: center;
   padding: 0 11px 0 8px;
   border-top: 3px solid var(--folder-color);
-  border-radius: 8px 8px 0 0;
-  background: color-mix(in srgb, var(--folder-color) 18%, #fff);
+  border-radius: 4px 4px 0 0;
+  background: color-mix(in srgb, var(--folder-color) 24%, #fff);
   color: #252525;
 }
 
@@ -372,8 +376,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   display: grid;
   width: 154px;
   padding: 4px;
-  border: 1px solid #dedede;
-  border-radius: 7px;
+  border: 1px solid #d3d9e4;
+  border-radius: 5px;
   background: #fff;
   box-shadow: 0 8px 24px rgba(0, 0, 0, .14);
 }
@@ -385,7 +389,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   min-height: 30px;
   padding: 0 8px;
   border: 0;
-  border-radius: 4px;
+  border-radius: 3px;
   background: transparent;
   color: #333;
   font-size: 11px;
@@ -401,7 +405,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   min-height: 60px;
   padding: 7px;
   border: 1px solid transparent;
-  border-radius: 0 0 10px 10px;
+  border-radius: 0 0 5px 5px;
 }
 
 .bookmark-list { display: grid; gap: 1px; }
@@ -413,11 +417,11 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   min-height: 34px;
   align-items: center;
   border: 1px solid transparent;
-  border-radius: 7px;
+  border-radius: 4px;
   transition: border-color .14s, background .14s;
 }
 
-.bookmark-row:hover { border-color: #dedede; background: #f3f3f3; }
+.bookmark-row:hover { border-color: #cbd3e1; background: #edf1f7; }
 
 .bookmark-link {
   display: flex;
@@ -450,23 +454,23 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   padding: 0;
   place-items: center;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: #81837b;
   cursor: pointer;
 }
 
-.row-actions button:hover { background: #e8e8e8; color: #1e1e1e; }
+.row-actions button:hover { background: #e4e3ff; color: #4f43db; }
 .external-indicator { width: 12px; margin-right: 5px; color: #a8b1bf; }
 .bookmark-row:hover .external-indicator { display: none; }
 
 .nested-folder {
   margin-top: 2px;
   overflow: hidden;
-  border: 1px solid #e1e1e1;
+  border: 0;
   border-left: 3px solid var(--folder-color);
-  border-radius: 7px;
-  background: #fafafa;
+  border-radius: 4px;
+  background: #f7f8fb;
 }
 
 .nested-folder.depth-2 { margin-left: 7px; }
@@ -499,7 +503,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   min-height: 30px;
   padding: 0 5px 6px 12px;
   border: 1px solid transparent;
-  border-radius: 0 0 8px 8px;
+  border-radius: 0 0 4px 4px;
 }
 
 .nested-folder.is-collapsed > .nested-content { display: none; }
@@ -508,7 +512,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   width: 100%;
   padding: 8px;
   border: 1px dashed #d9d5ca;
-  border-radius: 7px;
+  border-radius: 4px;
   background: transparent;
   color: #9b9b93;
   font-size: 9px;
@@ -524,8 +528,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   flex-direction: column;
   gap: 4px;
   border: 1px dashed #d6d2c7;
-  border-radius: 10px;
-  background: #f8fafc;
+  border-radius: 5px;
+  background: #f3f6fb;
   color: #7c7d75;
   cursor: pointer;
 }
@@ -533,7 +537,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .empty-folder > span { display: grid; width: 27px; height: 27px; margin-bottom: 2px; place-items: center; border-radius: 50%; background: #e9edf3; }
 .empty-folder strong { font-size: 10px; }
 .empty-folder small { color: #aaa9a2; font-size: 9px; }
-.empty-folder:hover { border-color: #8da5cf; background: #f4f7fc; }
+.empty-folder:hover { border-color: #6f82c9; background: #eef0ff; }
 
 .folder-card-footer {
   display: flex;
@@ -547,7 +551,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   gap: 5px;
   padding: 5px 7px;
   border: 0;
-  border-radius: 6px;
+  border-radius: 4px;
   background: transparent;
   color: #898a82;
   font-size: 9px;
@@ -555,7 +559,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   cursor: pointer;
 }
 
-.folder-card-footer button:hover { background: #eeece4; color: #3c413b; }
+.folder-card-footer button:hover { background: #e9e8ff; color: #4f43db; }
 
 .board-empty {
   display: flex;
@@ -568,9 +572,9 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 }
 
 .empty-illustration { position: relative; width: 120px; height: 74px; margin-bottom: 23px; }
-.empty-illustration span { position: absolute; bottom: 0; width: 56px; height: 65px; border: 1px solid #c9c4b9; border-radius: 9px; background: #fbfaf5; box-shadow: 0 4px 0 rgba(42, 45, 40, .05); }
-.empty-illustration span:nth-child(1) { left: 3px; transform: rotate(-11deg); background: #efd081; }
-.empty-illustration span:nth-child(2) { right: 4px; transform: rotate(10deg); background: #91c9b6; }
+.empty-illustration span { position: absolute; bottom: 0; width: 56px; height: 65px; border: 1px solid #b9bfd0; border-radius: 5px; background: #fbfaf5; box-shadow: 0 4px 0 rgba(42, 45, 40, .05); }
+.empty-illustration span:nth-child(1) { left: 3px; transform: rotate(-11deg); background: #f0bd4f; }
+.empty-illustration span:nth-child(2) { right: 4px; transform: rotate(10deg); background: #56bd98; }
 .empty-illustration span:nth-child(3) { left: 32px; bottom: 5px; background: #fffdf8; }
 .board-empty h2 { margin: 3px 0 7px; font-size: 25px; font-weight: 700; letter-spacing: -.03em; }
 .board-empty p { max-width: 340px; margin: 0 0 20px; color: var(--muted); font-size: 12px; line-height: 1.6; }
@@ -590,7 +594,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   width: min(440px, 100%);
   padding: 22px;
   border: 1px solid #e0e5ed;
-  border-radius: 10px;
+  border-radius: 6px;
   background: #fff;
   box-shadow: 0 28px 80px rgba(24, 36, 56, .22);
   animation: dialog-in .15s ease-out;
@@ -604,11 +608,11 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .dialog-close { margin: -4px -4px 0 0; }
 .delete-dialog { max-width: 410px; text-align: center; }
 .delete-dialog p { margin: 8px 0 0; color: #777; font-size: 11px; line-height: 1.55; }
-.danger-mark { display: grid; width: 43px; height: 43px; margin: 0 auto 13px; place-items: center; border-radius: 50%; background: #f5ded8; color: #a84336; }
+.danger-mark { display: grid; width: 43px; height: 43px; margin: 0 auto 13px; place-items: center; border-radius: 50%; background: #f9d8d0; color: #b93425; }
 
 .field-label { display: block; margin: 15px 0 6px; color: #666; font-size: 9px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
-.ui-input { width: 100%; height: 36px; padding: 0 10px; border: 1px solid #d9d9d9; border-radius: 6px; outline: 0; background: #fff; color: #1e1e1e; font-size: 12px; }
-.ui-input:focus { border-color: #0d99ff; box-shadow: 0 0 0 2px rgba(13, 153, 255, .12); }
+.ui-input { width: 100%; height: 36px; padding: 0 10px; border: 1px solid #d2d8e3; border-radius: 4px; outline: 0; background: #fff; color: #1e1e1e; font-size: 12px; }
+.ui-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(91, 79, 242, .12); }
 .input-with-icon { position: relative; }
 .input-with-icon > svg { position: absolute; z-index: 1; top: 10px; left: 10px; color: #888; }
 .input-with-icon .ui-input { padding-left: 34px; }
@@ -627,8 +631,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   gap: 12px;
   padding: 12px 13px 12px 15px;
   border: 1px solid #284b3e;
-  border-radius: 10px;
-  background: #243e35;
+  border-radius: 5px;
+  background: #1f6249;
   color: #fff;
   box-shadow: 0 12px 35px rgba(30, 34, 30, .23);
   font-size: 11px;
@@ -647,7 +651,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   padding: 8px 12px 8px 8px;
   overflow: hidden;
   border: 1px solid #bdb8ac;
-  border-radius: 10px;
+  border-radius: 5px;
   background: #fff;
   box-shadow: 0 14px 40px rgba(32, 35, 31, .2);
   font-size: 11px;
@@ -656,7 +660,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   white-space: nowrap;
 }
 
-.splash { display: grid; min-height: 100vh; place-content: center; justify-items: center; background: #f4f6f9; }
+.splash { display: grid; min-height: 100vh; place-content: center; justify-items: center; background: #f2f4f8; }
 .splash-mark { width: 46px; height: 46px; font-size: 25px; animation: pulse 1.2s ease-in-out infinite alternate; }
 .splash p { color: var(--muted); font-size: 11px; }
 @keyframes pulse { to { transform: translateY(-5px) rotate(3deg); } }
@@ -677,7 +681,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   .bookmark-board { grid-template-columns: 1fr; }
   .section-heading { align-items: flex-start; flex-direction: column; gap: 5px; }
   .section-heading p { display: none; }
-  .folder-card { border-radius: 12px; }
+  .folder-card { border-radius: 6px; }
   .bookmark-search kbd { display: none; }
 }
 
