@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { BookmarkNode } from '../types'
-import { containsNode, countBookmarks, filterNodes, normalizeUrl } from './bookmarkTree'
+import { containsNode, countBookmarks, filterNodes, getBookmarkMoveIndex, normalizeUrl } from './bookmarkTree'
 
 const tree: BookmarkNode[] = [{
   id: '1',
@@ -16,4 +16,10 @@ describe('bookmark tree utilities', () => {
   it('detects descendants', () => expect(containsNode(tree[0], '4')).toBe(true))
   it('keeps ancestors when filtering', () => expect(filterNodes(tree, 'NN Group')[0].children?.[0].id).toBe('3'))
   it('normalizes host-like URLs', () => expect(normalizeUrl('example.com')).toBe('https://example.com'))
+  it('compensates Chrome indexes when moving down in the same folder', () => {
+    const node: BookmarkNode = { id: '2', parentId: '1', index: 2, title: 'Source' }
+    expect(getBookmarkMoveIndex(node, '1', 5)).toBe(6)
+    expect(getBookmarkMoveIndex(node, '1', 1)).toBe(1)
+    expect(getBookmarkMoveIndex(node, '3', 5)).toBe(5)
+  })
 })

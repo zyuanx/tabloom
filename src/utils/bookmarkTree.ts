@@ -12,6 +12,13 @@ export function containsNode(node: BookmarkNode, id: string): boolean {
   return node.id === id || Boolean(node.children?.some((child) => containsNode(child, id)))
 }
 
+export function getBookmarkMoveIndex(node: BookmarkNode, parentId: string, targetIndex?: number): number | undefined {
+  if (targetIndex === undefined) return undefined
+  return node.parentId === parentId && node.index !== undefined && node.index < targetIndex
+    ? targetIndex + 1
+    : targetIndex
+}
+
 export function countBookmarks(node: BookmarkNode): number {
   if (node.url) return 1
   return node.children?.reduce((sum, child) => sum + countBookmarks(child), 0) ?? 0

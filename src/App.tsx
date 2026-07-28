@@ -25,7 +25,7 @@ import { DeleteModal, EditorModal } from './components/Modal'
 import { useBookmarks } from './hooks/useBookmarks'
 import { usePreferences } from './hooks/usePreferences'
 import type { BookmarkNode, EditorIntent } from './types'
-import { containsNode, countBookmarks, filterNodes, findNode, getRootFolders } from './utils/bookmarkTree'
+import { containsNode, countBookmarks, filterNodes, findNode, getBookmarkMoveIndex, getRootFolders } from './utils/bookmarkTree'
 
 const collisionDetection: CollisionDetection = (args) => {
   const pointerCollisions = pointerWithin(args)
@@ -160,8 +160,10 @@ export default function App() {
     const parentId = target
       ? target.type === 'folder' ? String(target.folderId) : String(target.parentId)
       : activeRoot?.id
-    const index = target?.type === 'bookmark' ? Number(target.index) : undefined
+    const rawTargetIndex = target?.type === 'bookmark' ? Number(target.index) : undefined
+    const targetIndex = rawTargetIndex !== undefined && Number.isFinite(rawTargetIndex) ? rawTargetIndex : undefined
     if (!parentId) return
+    const index = getBookmarkMoveIndex(sourceNode, parentId, targetIndex)
 
     if (!sourceNode.url && containsNode(sourceNode, parentId)) {
       setToast('A folder cannot be moved inside itself.')

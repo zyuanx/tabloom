@@ -107,12 +107,19 @@ export async function moveBookmark(id: string, parentId: string, index?: number)
   }
 
   const tree = loadMockTree()
+  const source = findNode(tree, id)
+  const sourceParent = source?.parentId ? findNode(tree, source.parentId) : undefined
+  const sourceIndex = sourceParent?.children?.findIndex((child) => child.id === id) ?? -1
+  const movingWithinSameParent = source?.parentId === parentId
   const node = detachNode(tree, id)
   const parent = findNode(tree, parentId)
   if (!node || !parent) throw new Error('Bookmark could not be moved.')
   parent.children ??= []
   node.parentId = parentId
-  const targetIndex = index === undefined ? parent.children.length : Math.min(index, parent.children.length)
+  const adjustedIndex = index !== undefined && movingWithinSameParent && sourceIndex >= 0 && sourceIndex < index
+    ? index - 1
+    : index
+  const targetIndex = adjustedIndex === undefined ? parent.children.length : Math.min(adjustedIndex, parent.children.length)
   parent.children.splice(targetIndex, 0, node)
   saveMockTree(tree)
 }
