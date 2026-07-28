@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Tabloom - Bookmark Dashboard",
+  "version": "0.1.0",
+  "description": "A layered bookmark dashboard for your new tab page.",
+  "icons": {
+    "16": "icon-16.png",
+    "32": "icon-32.png",
+    "48": "icon-48.png",
+    "128": "icon-128.png"
+  },
+  "permissions": ["bookmarks", "storage", "favicon"],
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  }
+}
