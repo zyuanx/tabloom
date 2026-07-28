@@ -87,6 +87,7 @@ function BookmarkRow({ node, actions, dragDisabled }: BookmarkRowProps) {
     id: `node:${node.id}`,
     data: { type: 'bookmark', kind: 'bookmark', nodeId: node.id, parentId: node.parentId, index: node.index ?? 0, title: node.title },
     disabled: dragDisabled,
+    transition: { duration: 190, easing: 'cubic-bezier(.2, .8, .2, 1)' },
   })
   const icon = faviconUrl(node.url!)
 
@@ -125,6 +126,7 @@ function NestedFolder({ node, actions, meta, dragDisabled, depth }: NestedFolder
     id: `node:${node.id}`,
     data: { type: 'bookmark', kind: 'folder', nodeId: node.id, parentId: node.parentId, index: node.index ?? 0, title: node.title },
     disabled: dragDisabled,
+    transition: { duration: 190, easing: 'cubic-bezier(.2, .8, .2, 1)' },
   })
   const { setNodeRef: setDropRef, isOver } = useDroppable({
     id: `folder:${node.id}`,
@@ -198,18 +200,20 @@ function ItemDropPlaceholder({ parentId, index, previewIndex, title, kind = 'fol
   )
 }
 
-function ListStartDropZone({ parentId, disabled }: { parentId: string; disabled: boolean }) {
+function ListInsertionZone({ node, disabled }: { node: BookmarkNode; disabled: boolean }) {
   const { setNodeRef } = useDroppable({
-    id: `list-start:${parentId}`,
-    data: { type: 'bookmark', parentId, index: 0 },
-    disabled,
+    id: `list-insert:${node.parentId}:${node.id}`,
+    data: { type: 'bookmark', parentId: node.parentId, index: node.index ?? 0, targetNodeId: node.id },
+    disabled: disabled || !node.parentId,
   })
 
-  return <div ref={setNodeRef} className="list-start-drop-zone" aria-hidden="true" />
+  return <div ref={setNodeRef} className="list-insertion-zone" aria-hidden="true" />
 }
 
 function BookmarkList({ nodes, actions, meta, dragDisabled, depth = 1, parentId, allowFolderPreview = true }: BookmarkListProps) {
   const { active, over } = useDndContext()
+  const listElement = useRef<HTMLDivElement | null>(null)
+  const previousPositions = useRef(new Map<string, DOMRect>())
   const activeData = active?.data.current
   const overData = over?.data.current
   const targetParentId = overData?.type === 'folder' ? overData.folderId : overData?.parentId
@@ -220,9 +224,15 @@ function BookmarkList({ nodes, actions, meta, dragDisabled, depth = 1, parentId,
     nodes.length,
   ))
   const activeKind = activeData?.kind === 'bookmark' ? 'bookmark' : activeData?.kind === 'folder' ? 'folder' : undefined
+  const useNativeSortPreview = Boolean(
+    overData?.nodeId
+    && String(activeData?.parentId) === parentId
+    && String(overData.parentId) === parentId,
+  )
   const showItemPreview = Boolean(
     activeKind
     && (activeKind === 'bookmark' || allowFolderPreview)
+    && !useNativeSortPreview
     && String(targetParentId) === parentId
     && String(activeData?.nodeId) !== parentId
     && String(activeData?.nodeId) !== String(overData?.nodeId ?? ''),
@@ -236,17 +246,50 @@ function BookmarkList({ nodes, actions, meta, dragDisabled, depth = 1, parentId,
       kind={activeKind}
     />
   )
+  const manualPreviewPosition = showItemPreview ? previewIndex : -1
+
+  useLayoutEffect(() => {
+    const list = listElement.current
+    if (!list) return
+
+    const nextPositions = new Map<string, DOMRect>()
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    Array.from(list.children).forEach((element) => {
+      if (!(element instanceof HTMLElement)) return
+      const id = element.dataset.listNodeId
+      if (!id) return
+
+      element.getAnimations().forEach((animation) => animation.cancel())
+      const next = element.getBoundingClientRect()
+      const previous = previousPositions.current.get(id)
+      nextPositions.set(id, next)
+      if (!previous || reduceMotion) return
+
+      const deltaY = previous.top - next.top
+      if (Math.abs(deltaY) < 1) return
+      element.animate(
+        [
+          { transform: `translate3d(0, ${deltaY}px, 0)` },
+          { transform: 'translate3d(0, 0, 0)' },
+        ],
+        { duration: 190, easing: 'cubic-bezier(.2, .8, .2, 1)' },
+      )
+    })
+    previousPositions.current = nextPositions
+  }, [manualPreviewPosition, nodes])
 
   return (
     <SortableContext items={nodes.map((node) => `node:${node.id}`)} strategy={verticalListSortingStrategy}>
-      <div className="bookmark-list">
-        <ListStartDropZone parentId={parentId} disabled={dragDisabled} />
+      <div ref={listElement} className="bookmark-list">
         {nodes.map((node, index) => (
           <Fragment key={node.id}>
             {previewIndex === index && preview}
-            {node.url
-              ? <BookmarkRow node={node} actions={actions} dragDisabled={dragDisabled} />
-              : <NestedFolder node={node} actions={actions} meta={meta} dragDisabled={dragDisabled} depth={depth} />}
+            <div className="list-item-slot" data-list-node-id={node.id}>
+              <ListInsertionZone node={node} disabled={dragDisabled} />
+              {node.url
+                ? <BookmarkRow node={node} actions={actions} dragDisabled={dragDisabled} />
+                : <NestedFolder node={node} actions={actions} meta={meta} dragDisabled={dragDisabled} depth={depth} />}
+            </div>
           </Fragment>
         ))}
         {previewIndex === nodes.length && preview}
@@ -401,6 +444,7 @@ export function BookmarkBoard({ rootId, nodes, meta, actions, dragDisabled }: Bo
       rowSpan={previewRowSpan}
     />
   )
+  const topPreviewPosition = showTopLevelPreview ? previewIndex : -1
   const boardElement = useRef<HTMLDivElement | null>(null)
   const previousPositions = useRef(new Map<string, DOMRect>())
   const rootDrop = useDroppable({
@@ -443,7 +487,7 @@ export function BookmarkBoard({ rootId, nodes, meta, actions, dragDisabled }: Bo
       )
     })
     previousPositions.current = nextPositions
-  }, [nodes])
+  }, [nodes, topPreviewPosition])
 
   return (
     <div

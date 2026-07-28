@@ -31,12 +31,40 @@ const collisionDetection: CollisionDetection = (args) => {
   const pointerCollisions = pointerWithin(args)
   const insertionTarget = pointerCollisions.find(({ id }) => {
     const targetId = String(id)
-    return targetId.startsWith('list-start:')
+    return targetId.startsWith('list-insert:')
       || targetId.startsWith('item-preview:')
       || targetId.startsWith('folder-card-preview:')
   })
-  if (insertionTarget) return [insertionTarget]
+  if (insertionTarget) {
+    const insertionData = insertionTarget.data?.droppableContainer.data.current
+    const firstNodeId = insertionData?.targetNodeId
+    if (
+      String(insertionTarget.id).startsWith('list-insert:')
+      && firstNodeId
+      && String(args.active.data.current?.parentId) === String(insertionData.parentId)
+    ) {
+      const firstNode = closestCenter(args).find(({ id }) => String(id) === `node:${String(firstNodeId)}`)
+      if (firstNode) return [firstNode]
+    }
+    return [insertionTarget]
+  }
   const primaryId = String(pointerCollisions[0]?.id ?? '')
+  if (primaryId.startsWith('folder:')) {
+    const folderId = primaryId.slice('folder:'.length)
+    const nearestNode = closestCenter(args).find(({ id, data }) => (
+      String(id).startsWith('node:')
+      && String(data?.droppableContainer.data.current?.parentId) === folderId
+    ))
+    const nearestRect = nearestNode ? args.droppableRects.get(nearestNode.id) : undefined
+    const pointerY = args.pointerCoordinates?.y
+    if (
+      nearestNode
+      && nearestRect
+      && pointerY !== undefined
+      && pointerY >= nearestRect.top - 10
+      && pointerY <= nearestRect.bottom + 10
+    ) return [nearestNode]
+  }
   const primaryNodeId = primaryId.startsWith('top-node:')
     ? primaryId.slice('top-node:'.length)
     : primaryId.startsWith('node:')

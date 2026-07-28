@@ -322,7 +322,15 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   box-shadow: 0 0 0 2px rgba(91, 79, 242, .18), 0 3px 10px rgba(0, 0, 0, .07);
 }
 
-.folder-card.dragging, .nested-folder.dragging, .bookmark-row.dragging { opacity: .28; }
+.folder-card.dragging, .nested-folder.dragging, .bookmark-row.dragging {
+  opacity: 1;
+  outline: 1px dashed rgba(91, 79, 242, .5);
+  outline-offset: -1px;
+  background: rgba(91, 79, 242, .06);
+  box-shadow: inset 0 0 12px rgba(91, 79, 242, .08);
+}
+
+.folder-card.dragging > *, .nested-folder.dragging > *, .bookmark-row.dragging > * { visibility: hidden; }
 
 .folder-card-placeholder {
   display: flex;
@@ -339,6 +347,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   font-size: 10px;
   font-weight: 650;
   pointer-events: none;
+  animation: placeholder-in .14s ease-out;
 }
 
 .folder-card-placeholder span {
@@ -437,10 +446,12 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 
 .bookmark-list { position: relative; display: grid; gap: 1px; }
 
-.list-start-drop-zone {
+.list-item-slot { position: relative; min-width: 0; }
+
+.list-insertion-zone {
   position: absolute;
-  z-index: 2;
-  top: -8px;
+  z-index: 3;
+  top: -12px;
   right: 0;
   left: 0;
   height: 24px;
@@ -464,10 +475,12 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   font-size: 10px;
   font-weight: 650;
   pointer-events: none;
+  animation: placeholder-in .14s ease-out;
 }
 
 .item-drop-placeholder.bookmark { border-left-color: rgba(50, 166, 184, .8); color: #287f91; }
 .item-drop-placeholder span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@keyframes placeholder-in { from { opacity: .35; transform: scaleY(.75); } }
 .folder-card.drop-target .empty-folder,
 .nested-folder.drop-target > .nested-content > .compact-empty,
 .folder-card-body:has(> .bookmark-list > .item-drop-placeholder) > .empty-folder,
@@ -528,6 +541,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .bookmark-row:hover .external-indicator { display: none; }
 
 .nested-folder {
+  position: relative;
   margin-top: 2px;
   overflow: hidden;
   border: 0;
