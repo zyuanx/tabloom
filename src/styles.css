@@ -751,7 +751,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
     transition: max-height .2s ease, padding .2s ease, opacity .14s ease;
   }
 
-  .nested-folder:hover > .nested-content,
+  .nested-folder:hover:not(:has(> .nested-heading > .drag-handle:hover)) > .nested-content,
   .nested-folder:has(:focus-visible) > .nested-content,
   .nested-folder.force-expanded > .nested-content {
     display: block;
@@ -770,7 +770,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
     transition: transform .16s ease;
   }
 
-  .nested-folder:hover > .nested-heading .folder-toggle > svg:first-child,
+  .nested-folder:hover:not(:has(> .nested-heading > .drag-handle:hover)) > .nested-heading .folder-toggle > svg:first-child,
   .nested-folder:has(:focus-visible) > .nested-heading .folder-toggle > svg:first-child,
   .nested-folder.force-expanded > .nested-heading .folder-toggle > svg:first-child {
     transform: rotate(0);
