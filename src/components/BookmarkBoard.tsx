@@ -179,22 +179,33 @@ interface DropPlaceholderProps {
   index?: number
   previewIndex: number
   title: string
+  kind?: 'bookmark' | 'folder'
 }
 
-function FolderDropPlaceholder({ parentId, index, previewIndex, title }: DropPlaceholderProps) {
+function ItemDropPlaceholder({ parentId, index, previewIndex, title, kind = 'folder' }: DropPlaceholderProps) {
   const { setNodeRef } = useDroppable({
-    id: `folder-preview:${parentId}:${previewIndex}`,
+    id: `item-preview:${parentId}:${previewIndex}`,
     data: index === undefined
       ? { type: 'folder', folderId: parentId, previewIndex }
       : { type: 'bookmark', parentId, index, previewIndex },
   })
 
   return (
-    <div ref={setNodeRef} className="folder-drop-placeholder" aria-hidden="true">
-      <Folder size={14} />
+    <div ref={setNodeRef} className={`item-drop-placeholder ${kind}`} aria-hidden="true">
+      {kind === 'folder' ? <Folder size={14} /> : <Link2 size={14} />}
       <span>{title}</span>
     </div>
   )
+}
+
+function ListStartDropZone({ parentId, disabled }: { parentId: string; disabled: boolean }) {
+  const { setNodeRef } = useDroppable({
+    id: `list-start:${parentId}`,
+    data: { type: 'bookmark', parentId, index: 0 },
+    disabled,
+  })
+
+  return <div ref={setNodeRef} className="list-start-drop-zone" aria-hidden="true" />
 }
 
 function BookmarkList({ nodes, actions, meta, dragDisabled, depth = 1, parentId, allowFolderPreview = true }: BookmarkListProps) {
@@ -208,24 +219,28 @@ function BookmarkList({ nodes, actions, meta, dragDisabled, depth = 1, parentId,
     Number.isFinite(overPreviewIndex) ? overPreviewIndex : Number.isFinite(overIndex) ? overIndex : nodes.length,
     nodes.length,
   ))
-  const showFolderPreview = Boolean(
-    allowFolderPreview
-    && activeData?.kind === 'folder'
+  const activeKind = activeData?.kind === 'bookmark' ? 'bookmark' : activeData?.kind === 'folder' ? 'folder' : undefined
+  const showItemPreview = Boolean(
+    activeKind
+    && (activeKind === 'bookmark' || allowFolderPreview)
     && String(targetParentId) === parentId
-    && String(activeData.nodeId) !== parentId,
+    && String(activeData?.nodeId) !== parentId
+    && String(activeData?.nodeId) !== String(overData?.nodeId ?? ''),
   )
-  const preview = showFolderPreview && (
-    <FolderDropPlaceholder
+  const preview = showItemPreview && activeKind && (
+    <ItemDropPlaceholder
       parentId={parentId}
       index={overData?.type === 'bookmark' && Number.isFinite(overIndex) ? overIndex : undefined}
       previewIndex={previewIndex}
       title={String(activeData?.title ?? 'Folder')}
+      kind={activeKind}
     />
   )
 
   return (
     <SortableContext items={nodes.map((node) => `node:${node.id}`)} strategy={verticalListSortingStrategy}>
       <div className="bookmark-list">
+        <ListStartDropZone parentId={parentId} disabled={dragDisabled} />
         {nodes.map((node, index) => (
           <Fragment key={node.id}>
             {previewIndex === index && preview}

@@ -312,8 +312,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 
 .folder-card.drop-target,
 .nested-folder.drop-target,
-.folder-card:has(> .folder-card-body > .bookmark-list > .folder-drop-placeholder),
-.nested-folder:has(> .nested-content > .bookmark-list > .folder-drop-placeholder) {
+.folder-card:has(> .folder-card-body > .bookmark-list > .item-drop-placeholder),
+.nested-folder:has(> .nested-content > .bookmark-list > .item-drop-placeholder) {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
@@ -435,9 +435,19 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   border-radius: 0 0 5px 5px;
 }
 
-.bookmark-list { display: grid; gap: 1px; }
+.bookmark-list { position: relative; display: grid; gap: 1px; }
 
-.folder-drop-placeholder {
+.list-start-drop-zone {
+  position: absolute;
+  z-index: 2;
+  top: -8px;
+  right: 0;
+  left: 0;
+  height: 24px;
+  pointer-events: none;
+}
+
+.item-drop-placeholder {
   display: flex;
   min-width: 0;
   min-height: 34px;
@@ -456,11 +466,12 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   pointer-events: none;
 }
 
-.folder-drop-placeholder span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.item-drop-placeholder.bookmark { border-left-color: rgba(50, 166, 184, .8); color: #287f91; }
+.item-drop-placeholder span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .folder-card.drop-target .empty-folder,
 .nested-folder.drop-target > .nested-content > .compact-empty,
-.folder-card-body:has(> .bookmark-list > .folder-drop-placeholder) > .empty-folder,
-.nested-content:has(> .bookmark-list > .folder-drop-placeholder) > .compact-empty { display: none; }
+.folder-card-body:has(> .bookmark-list > .item-drop-placeholder) > .empty-folder,
+.nested-content:has(> .bookmark-list > .item-drop-placeholder) > .compact-empty { display: none; }
 
 .bookmark-row {
   position: relative;

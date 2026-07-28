@@ -29,6 +29,13 @@ import { containsNode, countBookmarks, filterNodes, findNode, getRootFolders } f
 
 const collisionDetection: CollisionDetection = (args) => {
   const pointerCollisions = pointerWithin(args)
+  const insertionTarget = pointerCollisions.find(({ id }) => {
+    const targetId = String(id)
+    return targetId.startsWith('list-start:')
+      || targetId.startsWith('item-preview:')
+      || targetId.startsWith('folder-card-preview:')
+  })
+  if (insertionTarget) return [insertionTarget]
   const primaryId = String(pointerCollisions[0]?.id ?? '')
   const primaryNodeId = primaryId.startsWith('top-node:')
     ? primaryId.slice('top-node:'.length)
