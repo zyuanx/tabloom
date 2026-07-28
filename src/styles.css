@@ -289,7 +289,6 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 }
 
 .folder-card {
-  position: relative;
   min-width: 0;
   overflow: visible;
   border: 1px solid #dedede;
@@ -307,30 +306,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 
 .folder-card.drop-target, .nested-folder.drop-target {
   border-color: #0d99ff;
-  outline: 3px solid rgba(13, 153, 255, .24);
-  background: #eef8ff;
-  box-shadow: 0 8px 24px rgba(13, 153, 255, .2);
-}
-
-.folder-card.drop-target::after, .nested-folder.drop-target::after {
-  position: absolute;
-  z-index: 20;
-  top: 6px;
-  right: 6px;
-  max-width: calc(100% - 12px);
-  overflow: hidden;
-  padding: 5px 9px;
-  border-radius: 999px;
-  background: #0d99ff;
-  box-shadow: 0 3px 10px rgba(13, 112, 190, .3);
-  color: #fff;
-  content: attr(data-drop-label);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .01em;
-  pointer-events: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  outline: 2px solid #0d99ff;
+  outline-offset: 1px;
 }
 
 .folder-card.sort-target {
@@ -484,7 +461,6 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 .bookmark-row:hover .external-indicator { display: none; }
 
 .nested-folder {
-  position: relative;
   margin-top: 2px;
   overflow: hidden;
   border: 1px solid #e1e1e1;
@@ -720,7 +696,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   }
 
   .nested-folder:hover > .nested-content,
-  .nested-folder:focus-within > .nested-content,
+  .nested-folder:has(:focus-visible) > .nested-content,
   .nested-folder.force-expanded > .nested-content {
     display: block;
     max-height: min(52vh, 520px);
@@ -739,7 +715,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   }
 
   .nested-folder:hover > .nested-heading .folder-toggle > svg:first-child,
-  .nested-folder:focus-within > .nested-heading .folder-toggle > svg:first-child,
+  .nested-folder:has(:focus-visible) > .nested-heading .folder-toggle > svg:first-child,
   .nested-folder.force-expanded > .nested-heading .folder-toggle > svg:first-child {
     transform: rotate(0);
   }

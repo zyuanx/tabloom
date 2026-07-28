@@ -139,7 +139,6 @@ function NestedFolder({ node, actions, meta, dragDisabled, depth }: NestedFolder
   return (
     <div
       ref={setFolderRef}
-      data-drop-label={`Move into ${node.title}`}
       className={`nested-folder depth-${Math.min(depth, 3)} ${collapsed ? 'is-collapsed' : ''} ${dragDisabled ? 'force-expanded' : ''} ${isDragging ? 'dragging' : ''} ${isOver ? 'drop-target' : ''}`}
       style={{ transform: CSS.Transform.toString(transform), transition, '--folder-color': color } as React.CSSProperties}
     >
@@ -237,7 +236,6 @@ function FolderCard({ folder, id, title, parentId, children, color, meta, action
     <article
       ref={cardRef}
       data-folder-card-id={id}
-      data-drop-label={virtual ? 'Move to Quick links' : `Move into ${title}`}
       className={`folder-card ${dragDisabled ? 'force-expanded' : ''} ${draggable.isDragging ? 'dragging' : ''} ${reorderDrop.isOver ? 'sort-target' : ''} ${folderDrop.isOver ? 'drop-target' : ''}`}
       style={{ '--folder-color': color, gridRowEnd: `span ${rowSpan}` } as React.CSSProperties}
     >
