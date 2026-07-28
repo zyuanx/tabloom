@@ -310,7 +310,10 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   box-shadow: 0 3px 10px rgba(50, 61, 85, .09);
 }
 
-.folder-card.drop-target, .nested-folder.drop-target {
+.folder-card.drop-target,
+.nested-folder.drop-target,
+.folder-card:has(> .folder-card-body > .bookmark-list > .folder-drop-placeholder),
+.nested-folder:has(> .nested-content > .bookmark-list > .folder-drop-placeholder) {
   outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
@@ -320,6 +323,30 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 }
 
 .folder-card.dragging, .nested-folder.dragging, .bookmark-row.dragging { opacity: .28; }
+
+.folder-card-placeholder {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  border: 1px dashed rgba(91, 79, 242, .72);
+  border-radius: 5px;
+  background: rgba(91, 79, 242, .07);
+  box-shadow: inset 0 0 0 2px rgba(91, 79, 242, .06), 0 7px 18px rgba(64, 55, 170, .1);
+  color: #6258c8;
+  font-size: 10px;
+  font-weight: 650;
+  pointer-events: none;
+}
+
+.folder-card-placeholder span {
+  max-width: 80%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .folder-card-header {
   position: relative;
@@ -409,6 +436,31 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 }
 
 .bookmark-list { display: grid; gap: 1px; }
+
+.folder-drop-placeholder {
+  display: flex;
+  min-width: 0;
+  min-height: 34px;
+  align-items: center;
+  gap: 7px;
+  margin: 2px 0;
+  padding: 0 8px;
+  border: 1px dashed rgba(91, 79, 242, .72);
+  border-left: 3px solid rgba(91, 79, 242, .72);
+  border-radius: 4px;
+  background: rgba(91, 79, 242, .07);
+  box-shadow: inset 0 0 0 1px rgba(91, 79, 242, .05);
+  color: #6258c8;
+  font-size: 10px;
+  font-weight: 650;
+  pointer-events: none;
+}
+
+.folder-drop-placeholder span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.folder-card.drop-target .empty-folder,
+.nested-folder.drop-target > .nested-content > .compact-empty,
+.folder-card-body:has(> .bookmark-list > .folder-drop-placeholder) > .empty-folder,
+.nested-content:has(> .bookmark-list > .folder-drop-placeholder) > .compact-empty { display: none; }
 
 .bookmark-row {
   position: relative;

@@ -1,4 +1,4 @@
-import { useDraggable, useDroppable } from '@dnd-kit/core'
+import { useDndContext, useDraggable, useDroppable } from '@dnd-kit/core'
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import {
@@ -14,7 +14,7 @@ import {
   Plus,
   Trash2,
 } from 'lucide-react'
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { BookmarkNode, FolderMetaMap } from '../types'
 import { faviconUrl } from '../services/chromeApi'
 import { countBookmarks, getHostname } from '../utils/bookmarkTree'
@@ -85,7 +85,7 @@ interface BookmarkRowProps {
 function BookmarkRow({ node, actions, dragDisabled }: BookmarkRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `node:${node.id}`,
-    data: { type: 'bookmark', nodeId: node.id, parentId: node.parentId, index: node.index ?? 0 },
+    data: { type: 'bookmark', kind: 'bookmark', nodeId: node.id, parentId: node.parentId, index: node.index ?? 0, title: node.title },
     disabled: dragDisabled,
   })
   const icon = faviconUrl(node.url!)
@@ -123,7 +123,7 @@ function NestedFolder({ node, actions, meta, dragDisabled, depth }: NestedFolder
   const collapsed = Boolean(meta[node.id]?.collapsed)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `node:${node.id}`,
-    data: { type: 'bookmark', nodeId: node.id, parentId: node.parentId, index: node.index ?? 0 },
+    data: { type: 'bookmark', kind: 'folder', nodeId: node.id, parentId: node.parentId, index: node.index ?? 0, title: node.title },
     disabled: dragDisabled,
   })
   const { setNodeRef: setDropRef, isOver } = useDroppable({
@@ -171,15 +171,70 @@ interface BookmarkListProps {
   dragDisabled: boolean
   depth?: number
   parentId: string
+  allowFolderPreview?: boolean
 }
 
-function BookmarkList({ nodes, actions, meta, dragDisabled, depth = 1 }: BookmarkListProps) {
+interface DropPlaceholderProps {
+  parentId: string
+  index?: number
+  previewIndex: number
+  title: string
+}
+
+function FolderDropPlaceholder({ parentId, index, previewIndex, title }: DropPlaceholderProps) {
+  const { setNodeRef } = useDroppable({
+    id: `folder-preview:${parentId}:${previewIndex}`,
+    data: index === undefined
+      ? { type: 'folder', folderId: parentId, previewIndex }
+      : { type: 'bookmark', parentId, index, previewIndex },
+  })
+
+  return (
+    <div ref={setNodeRef} className="folder-drop-placeholder" aria-hidden="true">
+      <Folder size={14} />
+      <span>{title}</span>
+    </div>
+  )
+}
+
+function BookmarkList({ nodes, actions, meta, dragDisabled, depth = 1, parentId, allowFolderPreview = true }: BookmarkListProps) {
+  const { active, over } = useDndContext()
+  const activeData = active?.data.current
+  const overData = over?.data.current
+  const targetParentId = overData?.type === 'folder' ? overData.folderId : overData?.parentId
+  const overIndex = overData?.type === 'bookmark' ? Number(overData.index) : nodes.length
+  const overPreviewIndex = Number(overData?.previewIndex)
+  const previewIndex = Math.max(0, Math.min(
+    Number.isFinite(overPreviewIndex) ? overPreviewIndex : Number.isFinite(overIndex) ? overIndex : nodes.length,
+    nodes.length,
+  ))
+  const showFolderPreview = Boolean(
+    allowFolderPreview
+    && activeData?.kind === 'folder'
+    && String(targetParentId) === parentId
+    && String(activeData.nodeId) !== parentId,
+  )
+  const preview = showFolderPreview && (
+    <FolderDropPlaceholder
+      parentId={parentId}
+      index={overData?.type === 'bookmark' && Number.isFinite(overIndex) ? overIndex : undefined}
+      previewIndex={previewIndex}
+      title={String(activeData?.title ?? 'Folder')}
+    />
+  )
+
   return (
     <SortableContext items={nodes.map((node) => `node:${node.id}`)} strategy={verticalListSortingStrategy}>
       <div className="bookmark-list">
-        {nodes.map((node) => node.url
-          ? <BookmarkRow key={node.id} node={node} actions={actions} dragDisabled={dragDisabled} />
-          : <NestedFolder key={node.id} node={node} actions={actions} meta={meta} dragDisabled={dragDisabled} depth={depth} />)}
+        {nodes.map((node, index) => (
+          <Fragment key={node.id}>
+            {previewIndex === index && preview}
+            {node.url
+              ? <BookmarkRow node={node} actions={actions} dragDisabled={dragDisabled} />
+              : <NestedFolder node={node} actions={actions} meta={meta} dragDisabled={dragDisabled} depth={depth} />}
+          </Fragment>
+        ))}
+        {previewIndex === nodes.length && preview}
       </div>
     </SortableContext>
   )
@@ -203,7 +258,7 @@ function FolderCard({ folder, id, title, parentId, children, color, meta, action
   const cardElement = useRef<HTMLDivElement | null>(null)
   const draggable = useDraggable({
     id: `node:${id}`,
-    data: { type: 'bookmark', nodeId: id, parentId, index: folder?.index ?? 0 },
+    data: { type: 'bookmark', kind: 'folder', nodeId: id, parentId, index: folder?.index ?? 0, title },
     disabled: dragDisabled || virtual,
   })
   const reorderDrop = useDroppable({
@@ -249,7 +304,7 @@ function FolderCard({ folder, id, title, parentId, children, color, meta, action
         {!virtual && folder && <FolderMenu folder={folder} actions={actions} />}
       </header>
       <div ref={folderDrop.setNodeRef} className="folder-card-body">
-        <BookmarkList nodes={children} actions={actions} meta={meta} dragDisabled={dragDisabled} parentId={id} />
+        <BookmarkList nodes={children} actions={actions} meta={meta} dragDisabled={dragDisabled} parentId={id} allowFolderPreview={!virtual} />
         {!children.length && (
           <button className="empty-folder" onClick={() => actions.createBookmark(id)}>
             <span><Plus size={18} /></span>
@@ -274,9 +329,63 @@ interface BoardProps {
   dragDisabled: boolean
 }
 
+interface FolderCardPlaceholderProps extends DropPlaceholderProps {
+  height: number
+  rowSpan: number
+}
+
+function FolderCardPlaceholder({ parentId, index, previewIndex, title, height, rowSpan }: FolderCardPlaceholderProps) {
+  const { setNodeRef } = useDroppable({
+    id: `folder-card-preview:${parentId}:${previewIndex}`,
+    data: index === undefined
+      ? { type: 'folder', folderId: parentId, previewIndex }
+      : { type: 'bookmark', parentId, index, previewIndex },
+  })
+
+  return (
+    <div
+      ref={setNodeRef}
+      className="folder-card-placeholder"
+      style={{ minHeight: height, gridRowEnd: `span ${rowSpan}` }}
+      aria-hidden="true"
+    >
+      <Folder size={18} />
+      <span>{title}</span>
+    </div>
+  )
+}
+
 export function BookmarkBoard({ rootId, nodes, meta, actions, dragDisabled }: BoardProps) {
   const folders = nodes.filter((node) => !node.url)
   const links = nodes.filter((node) => node.url)
+  const { active, over } = useDndContext()
+  const activeData = active?.data.current
+  const overData = over?.data.current
+  const targetParentId = overData?.type === 'folder' ? overData.folderId : overData?.parentId
+  const targetFolderIndex = folders.findIndex((folder) => folder.id === String(overData?.nodeId))
+  const overPreviewIndex = Number(overData?.previewIndex)
+  const previewIndex = Number.isFinite(overPreviewIndex)
+    ? Math.max(0, Math.min(overPreviewIndex, folders.length))
+    : targetFolderIndex >= 0 ? targetFolderIndex : folders.length
+  const overIndex = Number(overData?.index)
+  const dropIndex = overData?.type === 'bookmark' && Number.isFinite(overIndex) ? overIndex : undefined
+  const activeHeight = active?.rect.current.initial?.height ?? 90
+  const previewRowSpan = Math.max(1, Math.ceil((activeHeight + 13) / 14))
+  const showTopLevelPreview = Boolean(
+    activeData?.kind === 'folder'
+    && String(targetParentId) === rootId
+    && String(activeData.nodeId) !== String(overData?.nodeId ?? ''),
+  )
+  const topLevelPreview = showTopLevelPreview && (
+    <FolderCardPlaceholder
+      parentId={rootId}
+      index={dropIndex}
+      previewIndex={previewIndex}
+      title={String(activeData?.title ?? 'Folder')}
+      height={activeHeight}
+      rowSpan={previewRowSpan}
+    />
+  )
   const boardElement = useRef<HTMLDivElement | null>(null)
   const previousPositions = useRef(new Map<string, DOMRect>())
   const rootDrop = useDroppable({
@@ -327,20 +436,23 @@ export function BookmarkBoard({ rootId, nodes, meta, actions, dragDisabled }: Bo
       className={`board-drop-surface ${rootDrop.isOver ? 'root-target' : ''}`}
     >
       <div className="bookmark-board">
-        {folders.map((folder) => (
-          <FolderCard
-            key={folder.id}
-            folder={folder}
-            id={folder.id}
-            parentId={rootId}
-            title={folder.title}
-            children={folder.children ?? []}
-            color={folderColor(folder.id, meta[folder.id]?.color)}
-            meta={meta}
-            actions={actions}
-            dragDisabled={dragDisabled}
-          />
+        {folders.map((folder, index) => (
+          <Fragment key={folder.id}>
+            {previewIndex === index && topLevelPreview}
+            <FolderCard
+              folder={folder}
+              id={folder.id}
+              parentId={rootId}
+              title={folder.title}
+              children={folder.children ?? []}
+              color={folderColor(folder.id, meta[folder.id]?.color)}
+              meta={meta}
+              actions={actions}
+              dragDisabled={dragDisabled}
+            />
+          </Fragment>
         ))}
+        {previewIndex === folders.length && topLevelPreview}
         {links.length > 0 && (
           <FolderCard
             id={rootId}
