@@ -7,7 +7,6 @@
   text-rendering: optimizeLegibility;
   --ink: #181a20;
   --muted: #687184;
-  --line: #d8dde7;
   --paper: #ffffff;
   --accent: #5b4ff2;
 }
@@ -43,14 +42,11 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 
 .splash-mark {
   display: grid;
-  width: 31px;
-  height: 31px;
   place-items: center;
   border-radius: 6px 6px 6px 2px;
   background: #5146d8;
   color: #dce8ff;
   font-family: Georgia, serif;
-  font-size: 18px;
 }
 
 .eyebrow {
@@ -303,7 +299,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   border-radius: 5px;
   background: var(--paper);
   box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
-  transition: box-shadow .18s, border-color .18s, opacity .18s;
+  transition: box-shadow .18s;
   transform-origin: center;
 }
 
@@ -512,7 +508,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 
 .bookmark-copy { display: flex; min-width: 0; flex: 1; align-items: baseline; gap: 7px; }
 .bookmark-copy strong { min-width: 0; overflow: hidden; flex: 1; font-size: 11px; font-weight: 600; text-overflow: ellipsis; white-space: nowrap; }
-.bookmark-copy small { max-width: 86px; overflow: hidden; color: #999; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.bookmark-copy small { max-width: 86px; overflow: hidden; color: #727c8d; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 
 .row-actions {
   display: none;
@@ -522,7 +518,8 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   background: inherit;
 }
 
-.bookmark-row:hover .row-actions, .nested-heading:hover .row-actions { display: flex; }
+.bookmark-row:hover .row-actions, .nested-heading:hover .row-actions,
+.bookmark-row:focus-within .row-actions, .nested-heading:focus-within .row-actions { display: flex; }
 
 .row-actions button {
   display: grid;
@@ -569,7 +566,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 }
 
 .folder-toggle > span { overflow: hidden; font-size: 10.5px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-.folder-toggle small { margin-left: auto; color: #999a92; font-size: 9px; }
+.folder-toggle small { margin-left: auto; color: #707989; font-size: 9px; }
 .folder-toggle .folder-icon {
   color: color-mix(in srgb, var(--folder-color) 72%, #283248);
   fill: color-mix(in srgb, var(--folder-color) 32%, #fff);
@@ -616,7 +613,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
 
 .empty-folder > span { display: grid; width: 27px; height: 27px; margin-bottom: 2px; place-items: center; border-radius: 50%; background: #e9edf3; }
 .empty-folder strong { font-size: 10px; }
-.empty-folder small { color: #aaa9a2; font-size: 9px; }
+.empty-folder small { color: #737c8a; font-size: 9px; }
 .empty-folder:hover { border-color: #6f82c9; background: #eef0ff; }
 
 .folder-card-footer {
@@ -633,7 +630,7 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   border: 0;
   border-radius: 4px;
   background: transparent;
-  color: #898a82;
+  color: #687282;
   font-size: 9px;
   font-weight: 700;
   cursor: pointer;
@@ -668,10 +665,13 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   place-items: center;
   background: rgba(0, 0, 0, .36);
   backdrop-filter: blur(3px);
+  overflow-y: auto;
 }
 
 .ui-dialog {
   width: min(440px, 100%);
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
   padding: 22px;
   border: 1px solid #e0e5ed;
   border-radius: 6px;
@@ -765,6 +765,11 @@ button:focus-visible, a:focus-visible, input:focus-visible {
   .bookmark-search kbd { display: none; }
 }
 
+@media (hover: none), (pointer: coarse) {
+  .bookmark-row .row-actions, .nested-heading .row-actions { display: flex; }
+  .bookmark-row .external-indicator { display: none; }
+}
+
 @media (hover: hover) and (pointer: fine) {
   .nested-content {
     display: block;
@@ -836,7 +841,6 @@ button:focus-visible, a:focus-visible, input:focus-visible {
     background: #11141b;
     --ink: #edf0f6;
     --muted: #9ba5b6;
-    --line: #303846;
     --paper: #1b2029;
     --accent: #8b82ff;
   }

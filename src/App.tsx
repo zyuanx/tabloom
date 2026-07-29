@@ -83,7 +83,7 @@ const collisionDetection: CollisionDetection = (args) => {
 
 export default function App() {
   const bookmarks = useBookmarks()
-  const { preferences, ready, setActiveRootId, updateFolderMeta, cycleFolderColor } = usePreferences()
+  const { preferences, ready, error: preferencesError, clearError: clearPreferencesError, setActiveRootId, updateFolderMeta, cycleFolderColor } = usePreferences()
   const [query, setQuery] = useState('')
   const [editor, setEditor] = useState<EditorIntent | null>(null)
   const [deleting, setDeleting] = useState<BookmarkNode | null>(null)
@@ -122,12 +122,13 @@ export default function App() {
     const focusSearch = (event: KeyboardEvent) => {
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault()
+        if (editor || deleting) return
         searchRef.current?.focus()
       }
     }
     window.addEventListener('keydown', focusSearch)
     return () => window.removeEventListener('keydown', focusSearch)
-  }, [])
+  }, [deleting, editor])
 
   const handleSave = async (title: string, url?: string) => {
     if (!editor) return
@@ -136,14 +137,14 @@ export default function App() {
     setToast(editor.node ? 'Changes saved.' : `${editor.kind === 'folder' ? 'Folder' : 'Bookmark'} added.`)
   }
 
-  const actions = {
+  const actions = useMemo(() => ({
     edit: (node: BookmarkNode) => setEditor({ kind: node.url ? 'bookmark' : 'folder', parentId: node.parentId!, node }),
     remove: (node: BookmarkNode) => setDeleting(node),
     createBookmark: (parentId: string) => setEditor({ kind: 'bookmark', parentId }),
     createFolder: (parentId: string) => setEditor({ kind: 'folder', parentId }),
     toggleFolder: (id: string, collapsed: boolean) => updateFolderMeta(id, { collapsed }),
     cycleColor: (id: string) => cycleFolderColor(id),
-  }
+  }), [cycleFolderColor, updateFolderMeta])
 
   const handleDragStart = (event: DragStartEvent) => {
     const data = event.active.data.current
@@ -158,6 +159,9 @@ export default function App() {
 
     const sourceNode = findNode(bookmarks.tree, String(source.nodeId))
     if (!sourceNode) return
+    if (
+      String(target?.nodeId ?? target?.folderId ?? '') === sourceNode.id
+    ) return
     const parentId = target
       ? target.type === 'folder' ? String(target.folderId) : String(target.parentId)
       : activeRoot?.id
@@ -261,10 +265,10 @@ export default function App() {
       <DragOverlay dropAnimation={null}>{dragLabel && <div className="drag-overlay"><span className="site-icon">{dragLabel.charAt(0)}</span>{dragLabel}</div>}</DragOverlay>
       {editor && <EditorModal intent={editor} onClose={() => setEditor(null)} onSave={handleSave} />}
       {deleting && <DeleteModal node={deleting} onClose={() => setDeleting(null)} onConfirm={() => bookmarks.remove(deleting)} />}
-      {(toast || bookmarks.error) && (
-        <div className={`toast ${bookmarks.error ? 'error' : ''}`} role="status">
-          <span>{bookmarks.error || toast}</span>
-          <button onClick={() => { setToast(''); bookmarks.clearError() }} aria-label="Dismiss"><X size={15} /></button>
+      {(toast || bookmarks.error || preferencesError) && (
+        <div className={`toast ${bookmarks.error || preferencesError ? 'error' : ''}`} role="status">
+          <span>{bookmarks.error || preferencesError || toast}</span>
+          <button onClick={() => { setToast(''); bookmarks.clearError(); clearPreferencesError() }} aria-label="Dismiss"><X size={15} /></button>
         </div>
       )}
     </DndContext>

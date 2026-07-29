@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { FolderMetaMap } from '../types'
 import { getPreferences, savePreferences, type Preferences } from '../services/storage'
 
@@ -20,32 +20,60 @@ export function folderColor(id: string, saved?: string): string {
 export function usePreferences() {
   const [preferences, setPreferences] = useState<Preferences>({ folderMeta: {} })
   const [ready, setReady] = useState(false)
+  const [error, setError] = useState('')
+  const preferencesRef = useRef(preferences)
+  const saveQueue = useRef(Promise.resolve())
+  const mounted = useRef(true)
+  const loadVersion = useRef(0)
 
   useEffect(() => {
-    void getPreferences().then((value) => {
-      setPreferences(value)
-      setReady(true)
-    })
+    const version = ++loadVersion.current
+    mounted.current = true
+    void getPreferences()
+      .then((value) => {
+        if (!mounted.current || version !== loadVersion.current) return
+        preferencesRef.current = value
+        setPreferences(value)
+      })
+      .catch(() => {
+        if (mounted.current && version === loadVersion.current) setError('Could not load preferences. Defaults are being used.')
+      })
+      .finally(() => {
+        if (mounted.current && version === loadVersion.current) setReady(true)
+      })
+    return () => { mounted.current = false }
   }, [])
 
-  const persist = (next: Preferences) => {
+  const persist = useCallback((update: (current: Preferences) => Preferences) => {
+    const next = update(preferencesRef.current)
+    preferencesRef.current = next
     setPreferences(next)
-    void savePreferences(next)
-  }
+    saveQueue.current = saveQueue.current
+      .then(() => savePreferences(next))
+      .then(() => { if (mounted.current) setError('') })
+      .catch(() => { if (mounted.current) setError('Could not save preferences.') })
+  }, [])
 
-  const setActiveRootId = (activeRootId: string) => persist({ ...preferences, activeRootId })
-  const updateFolderMeta = (id: string, updates: FolderMetaMap[string]) => persist({
-    ...preferences,
+  const setActiveRootId = useCallback((activeRootId: string) => persist((current) => ({ ...current, activeRootId })), [persist])
+  const updateFolderMeta = useCallback((id: string, updates: FolderMetaMap[string]) => persist((current) => ({
+    ...current,
     folderMeta: {
-      ...preferences.folderMeta,
-      [id]: { ...preferences.folderMeta[id], ...updates },
+      ...current.folderMeta,
+      [id]: { ...current.folderMeta[id], ...updates },
     },
-  })
-  const cycleFolderColor = (id: string) => {
-    const current = folderColor(id, preferences.folderMeta[id]?.color)
-    const next = palette[(palette.indexOf(current) + 1) % palette.length]
-    updateFolderMeta(id, { color: next })
-  }
+  })), [persist])
+  const cycleFolderColor = useCallback((id: string) => persist((current) => {
+    const color = folderColor(id, current.folderMeta[id]?.color)
+    const next = palette[(palette.indexOf(color) + 1) % palette.length]
+    return {
+      ...current,
+      folderMeta: {
+        ...current.folderMeta,
+        [id]: { ...current.folderMeta[id], color: next },
+      },
+    }
+  }), [persist])
+  const clearError = useCallback(() => setError(''), [])
 
-  return { preferences, ready, setActiveRootId, updateFolderMeta, cycleFolderColor }
+  return { preferences, ready, error, clearError, setActiveRootId, updateFolderMeta, cycleFolderColor }
 }

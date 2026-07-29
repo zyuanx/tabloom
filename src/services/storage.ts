@@ -10,13 +10,22 @@ export interface Preferences {
 
 const defaults: Preferences = { folderMeta: {} }
 
+export function normalizePreferences(value: unknown): Preferences {
+  if (!value || typeof value !== 'object') return defaults
+  const stored = value as Partial<Preferences>
+  return {
+    ...(typeof stored.activeRootId === 'string' ? { activeRootId: stored.activeRootId } : {}),
+    folderMeta: stored.folderMeta && typeof stored.folderMeta === 'object' && !Array.isArray(stored.folderMeta) ? stored.folderMeta : {},
+  }
+}
+
 export async function getPreferences(): Promise<Preferences> {
   if (isExtensionContext) {
     const result = await chrome.storage.local.get(STORAGE_KEY)
-    return { ...defaults, ...(result[STORAGE_KEY] as Preferences | undefined) }
+    return normalizePreferences(result[STORAGE_KEY])
   }
   const value = localStorage.getItem(STORAGE_KEY)
-  return value ? { ...defaults, ...JSON.parse(value) as Preferences } : defaults
+  return value ? normalizePreferences(JSON.parse(value) as unknown) : defaults
 }
 
 export async function savePreferences(preferences: Preferences): Promise<void> {

@@ -228,6 +228,7 @@ function BookmarkList({ nodes, actions, meta, dragDisabled, depth = 1, parentId,
   const activeKind = activeData?.kind === 'bookmark' ? 'bookmark' : activeData?.kind === 'folder' ? 'folder' : undefined
   const useNativeSortPreview = Boolean(
     overData?.nodeId
+    && nodes.some((node) => node.id === String(overData.nodeId))
     && String(activeData?.parentId) === parentId
     && String(overData.parentId) === parentId,
   )
@@ -351,7 +352,7 @@ function FolderCard({ folder, id, title, parentId, children, color, meta, action
     <article
       ref={cardRef}
       data-folder-card-id={id}
-      className={`folder-card ${dragDisabled ? 'force-expanded' : ''} ${draggable.isDragging ? 'dragging' : ''} ${reorderDrop.isOver ? 'sort-target' : ''} ${folderDrop.isOver ? 'drop-target' : ''}`}
+      className={`folder-card ${draggable.isDragging ? 'dragging' : ''} ${reorderDrop.isOver ? 'sort-target' : ''} ${folderDrop.isOver ? 'drop-target' : ''}`}
       style={{ '--folder-color': color, gridRowEnd: `span ${rowSpan}` } as React.CSSProperties}
     >
       <header className="folder-card-header">

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { BookmarkNode } from '../types'
 import {
   createBookmark,
@@ -14,27 +14,41 @@ export function useBookmarks() {
   const [tree, setTree] = useState<BookmarkNode[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const refreshVersion = useRef(0)
+  const mounted = useRef(true)
 
-  const refresh = useCallback(async () => {
+  const refresh = useCallback(async (throwOnError = false) => {
+    const version = ++refreshVersion.current
     try {
-      setTree(await getBookmarkTree())
-      setError('')
+      const nextTree = await getBookmarkTree()
+      if (mounted.current && version === refreshVersion.current) {
+        setTree(nextTree)
+        setError('')
+      }
     } catch (reason) {
-      setError(reason instanceof Error ? reason.message : 'Could not load bookmarks.')
+      if (mounted.current && version === refreshVersion.current) {
+        setError(reason instanceof Error ? reason.message : 'Could not load bookmarks.')
+      }
+      if (throwOnError) throw reason
     } finally {
-      setLoading(false)
+      if (mounted.current && version === refreshVersion.current) setLoading(false)
     }
   }, [])
 
   useEffect(() => {
+    mounted.current = true
     void refresh()
-    return subscribeToBookmarks(() => void refresh())
+    const unsubscribe = subscribeToBookmarks(() => void refresh())
+    return () => {
+      mounted.current = false
+      unsubscribe()
+    }
   }, [refresh])
 
   const run = useCallback(async (operation: () => Promise<void>) => {
     try {
       await operation()
-      await refresh()
+      await refresh(true)
     } catch (reason) {
       const message = reason instanceof Error ? reason.message : 'The bookmark could not be changed.'
       setError(message)
@@ -42,16 +56,22 @@ export function useBookmarks() {
     }
   }, [refresh])
 
+  const create = useCallback((parentId: string, title: string, url?: string) =>
+    run(() => createBookmark({ parentId, title: title.trim(), url: url ? normalizeUrl(url) : undefined })), [run])
+  const update = useCallback((node: BookmarkNode, title: string, url?: string) =>
+    run(() => updateBookmark(node.id, { title: title.trim(), ...(node.url ? { url: normalizeUrl(url ?? '') } : {}) })), [run])
+  const remove = useCallback((node: BookmarkNode) => run(() => removeBookmark(node)), [run])
+  const move = useCallback((id: string, parentId: string, index?: number) => run(() => moveBookmark(id, parentId, index)), [run])
+  const clearError = useCallback(() => setError(''), [])
+
   return {
     tree,
     loading,
     error,
-    clearError: () => setError(''),
-    create: (parentId: string, title: string, url?: string) =>
-      run(() => createBookmark({ parentId, title: title.trim(), url: url ? normalizeUrl(url) : undefined })),
-    update: (node: BookmarkNode, title: string, url?: string) =>
-      run(() => updateBookmark(node.id, { title: title.trim(), ...(node.url ? { url: normalizeUrl(url ?? '') } : {}) })),
-    remove: (node: BookmarkNode) => run(() => removeBookmark(node)),
-    move: (id: string, parentId: string, index?: number) => run(() => moveBookmark(id, parentId, index)),
+    clearError,
+    create,
+    update,
+    remove,
+    move,
   }
 }

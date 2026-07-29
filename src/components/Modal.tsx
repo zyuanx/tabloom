@@ -16,10 +16,10 @@ export function EditorModal({ intent, onClose, onSave }: EditorModalProps) {
   const [error, setError] = useState('')
 
   useEffect(() => {
-    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && onClose()
+    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && !saving && onClose()
     window.addEventListener('keydown', closeOnEscape)
     return () => window.removeEventListener('keydown', closeOnEscape)
-  }, [onClose])
+  }, [onClose, saving])
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
@@ -39,14 +39,14 @@ export function EditorModal({ intent, onClose, onSave }: EditorModalProps) {
   const verb = intent.node ? 'Edit' : 'New'
 
   return (
-    <div className="dialog-backdrop" role="presentation" onMouseDown={onClose}>
+    <div className="dialog-backdrop" role="presentation" onMouseDown={() => { if (!saving) onClose() }}>
       <section className="ui-dialog editor-dialog" role="dialog" aria-modal="true" aria-labelledby="editor-title" onMouseDown={(event) => event.stopPropagation()}>
         <header className="dialog-header">
           <div>
             <span className="dialog-kicker">{verb}</span>
             <h2 id="editor-title">{isBookmark ? 'Bookmark' : 'Folder'}</h2>
           </div>
-          <button className="ui-icon-button dialog-close" onClick={onClose} aria-label="Close dialog"><X size={18} /></button>
+          <button className="ui-icon-button dialog-close" onClick={onClose} aria-label="Close dialog" disabled={saving}><X size={18} /></button>
         </header>
         <form onSubmit={submit}>
           <label className="field-label" htmlFor="item-title">Name</label>
@@ -75,7 +75,7 @@ export function EditorModal({ intent, onClose, onSave }: EditorModalProps) {
           )}
           {error && <p className="form-error">{error}</p>}
           <div className="dialog-actions">
-            <button type="button" className="ui-button secondary" onClick={onClose}>Cancel</button>
+            <button type="button" className="ui-button secondary" onClick={onClose} disabled={saving}>Cancel</button>
             <button type="submit" className="ui-button primary" disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
           </div>
         </form>
@@ -92,33 +92,37 @@ interface DeleteModalProps {
 
 export function DeleteModal({ node, onClose, onConfirm }: DeleteModalProps) {
   const [deleting, setDeleting] = useState(false)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && onClose()
+    const closeOnEscape = (event: KeyboardEvent) => event.key === 'Escape' && !deleting && onClose()
     window.addEventListener('keydown', closeOnEscape)
     return () => window.removeEventListener('keydown', closeOnEscape)
-  }, [onClose])
+  }, [deleting, onClose])
 
   const confirm = async () => {
     setDeleting(true)
+    setError('')
     try {
       await onConfirm()
       onClose()
     } catch {
+      setError('That item could not be removed. Please try again.')
       setDeleting(false)
     }
   }
 
   return (
-    <div className="dialog-backdrop" role="presentation" onMouseDown={onClose}>
+    <div className="dialog-backdrop" role="presentation" onMouseDown={() => { if (!deleting) onClose() }}>
       <section className="ui-dialog delete-dialog" role="alertdialog" aria-modal="true" aria-labelledby="delete-title" onMouseDown={(event) => event.stopPropagation()}>
         <div className="danger-mark"><AlertTriangle size={22} /></div>
         <h2 id="delete-title">Remove “{node.title}”?</h2>
         <p>
           {node.url ? 'This bookmark' : 'This folder and everything inside it'} will be removed from Chrome bookmarks.
         </p>
+        {error && <p className="form-error">{error}</p>}
         <div className="dialog-actions centered">
-          <button className="ui-button secondary" onClick={onClose}>Cancel</button>
+          <button className="ui-button secondary" onClick={onClose} disabled={deleting}>Cancel</button>
           <button className="ui-button danger" onClick={() => void confirm()} disabled={deleting}>{deleting ? 'Removing...' : 'Remove'}</button>
         </div>
       </section>
