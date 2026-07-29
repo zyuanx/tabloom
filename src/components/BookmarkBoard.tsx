@@ -80,12 +80,13 @@ interface BookmarkRowProps {
   node: BookmarkNode
   actions: BookmarkActions
   dragDisabled: boolean
+  visualIndex: number
 }
 
-function BookmarkRow({ node, actions, dragDisabled }: BookmarkRowProps) {
+function BookmarkRow({ node, actions, dragDisabled, visualIndex }: BookmarkRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `node:${node.id}`,
-    data: { type: 'bookmark', kind: 'bookmark', nodeId: node.id, parentId: node.parentId, index: node.index ?? 0, title: node.title },
+    data: { type: 'bookmark', kind: 'bookmark', nodeId: node.id, parentId: node.parentId, index: node.index ?? 0, visualIndex, title: node.title },
     disabled: dragDisabled,
     transition: { duration: 190, easing: 'cubic-bezier(.2, .8, .2, 1)' },
   })
@@ -118,13 +119,14 @@ interface NestedFolderProps {
   meta: FolderMetaMap
   dragDisabled: boolean
   depth: number
+  visualIndex: number
 }
 
-function NestedFolder({ node, actions, meta, dragDisabled, depth }: NestedFolderProps) {
+function NestedFolder({ node, actions, meta, dragDisabled, depth, visualIndex }: NestedFolderProps) {
   const collapsed = Boolean(meta[node.id]?.collapsed)
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: `node:${node.id}`,
-    data: { type: 'bookmark', kind: 'folder', nodeId: node.id, parentId: node.parentId, index: node.index ?? 0, title: node.title },
+    data: { type: 'bookmark', kind: 'folder', nodeId: node.id, parentId: node.parentId, index: node.index ?? 0, visualIndex, title: node.title },
     disabled: dragDisabled,
     transition: { duration: 190, easing: 'cubic-bezier(.2, .8, .2, 1)' },
   })
@@ -200,10 +202,10 @@ function ItemDropPlaceholder({ parentId, index, previewIndex, title, kind = 'fol
   )
 }
 
-function ListInsertionZone({ node, disabled }: { node: BookmarkNode; disabled: boolean }) {
+function ListInsertionZone({ node, visualIndex, disabled }: { node: BookmarkNode; visualIndex: number; disabled: boolean }) {
   const { setNodeRef } = useDroppable({
     id: `list-insert:${node.parentId}:${node.id}`,
-    data: { type: 'bookmark', parentId: node.parentId, index: node.index ?? 0, targetNodeId: node.id },
+    data: { type: 'bookmark', parentId: node.parentId, index: node.index ?? 0, visualIndex, targetNodeId: node.id },
     disabled: disabled || !node.parentId,
   })
 
@@ -218,7 +220,7 @@ function BookmarkList({ nodes, actions, meta, dragDisabled, depth = 1, parentId,
   const overData = over?.data.current
   const targetParentId = overData?.type === 'folder' ? overData.folderId : overData?.parentId
   const overIndex = overData?.type === 'bookmark' ? Number(overData.index) : nodes.length
-  const overPreviewIndex = Number(overData?.previewIndex)
+  const overPreviewIndex = Number(overData?.previewIndex ?? overData?.visualIndex)
   const previewIndex = Math.max(0, Math.min(
     Number.isFinite(overPreviewIndex) ? overPreviewIndex : Number.isFinite(overIndex) ? overIndex : nodes.length,
     nodes.length,
@@ -285,10 +287,10 @@ function BookmarkList({ nodes, actions, meta, dragDisabled, depth = 1, parentId,
           <Fragment key={node.id}>
             {previewIndex === index && preview}
             <div className="list-item-slot" data-list-node-id={node.id}>
-              <ListInsertionZone node={node} disabled={dragDisabled} />
+              <ListInsertionZone node={node} visualIndex={index} disabled={dragDisabled} />
               {node.url
-                ? <BookmarkRow node={node} actions={actions} dragDisabled={dragDisabled} />
-                : <NestedFolder node={node} actions={actions} meta={meta} dragDisabled={dragDisabled} depth={depth} />}
+                ? <BookmarkRow node={node} actions={actions} dragDisabled={dragDisabled} visualIndex={index} />
+                : <NestedFolder node={node} actions={actions} meta={meta} dragDisabled={dragDisabled} depth={depth} visualIndex={index} />}
             </div>
           </Fragment>
         ))}

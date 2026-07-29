@@ -77,6 +77,7 @@ const collisionDetection: CollisionDetection = (args) => {
   const specificTargets = pointerCollisions.filter(({ id }) => !String(id).startsWith('root-folder:'))
   if (specificTargets.length) return specificTargets
   if (pointerCollisions.length) return pointerCollisions
+  if (args.pointerCoordinates) return []
   return closestCenter(args)
 }
 
@@ -153,7 +154,7 @@ export default function App() {
     setDragLabel('')
     const source = event.active.data.current
     const target = event.over?.data.current
-    if (!source || event.active.id === event.over?.id) return
+    if (!source || !event.over || event.active.id === event.over.id) return
 
     const sourceNode = findNode(bookmarks.tree, String(source.nodeId))
     if (!sourceNode) return
